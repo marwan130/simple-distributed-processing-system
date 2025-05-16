@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+distributed_system.db
+client/node_modules/
+client/dist/
+client/dist-ssr/
+.vscode/
+.idea/
+.DS_Store
+*.tsbuildinfo 
