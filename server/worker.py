@@ -32,7 +32,7 @@ class Worker:
                         print("Heartbeat failed")
             except Exception:
                 pass
-            await asyncio.sleep(5)  # send heartbeat every 5 seconds
+            await asyncio.sleep(5)  
 
     async def process_next_task(self):
         async with self.session.get(f"{self.server_url}/tasks") as response:

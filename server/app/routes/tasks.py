@@ -39,14 +39,12 @@ async def worker_heartbeat(worker_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/workers/count")
 async def get_active_workers(db: AsyncSession = Depends(get_db)):
-    # remove inactive workers who dont have a heartbeat for 30 seconds
     cutoff_time = datetime.utcnow() - timedelta(seconds=30)
     await db.execute(
         delete(Worker).where(Worker.last_heartbeat < cutoff_time)
     )
     await db.commit()
     
-    # count remaining active workers
     result = await db.execute(select(Worker))
     workers = result.scalars().all()
     return {"count": len(workers)}
@@ -112,37 +110,3 @@ async def complete_task(
     task.result = task_result
     await db.commit()
     return {"status": "success"}
-
-@router.delete("/tasks/{task_id}")
-async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Task).filter(Task.id == task_id))
-    task = result.scalar_one_or_none()
-    
-    if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
-    await db.execute(delete(Task).where(Task.id == task_id))
-    await db.commit()
-    return {"status": "success", "message": f"Task {task_id} deleted"}
-
-@router.delete("/tasks/clear-completed")
-async def clear_completed_tasks(db: AsyncSession = Depends(get_db)):
-    try:
-        print("Attempting to clear completed tasks...")
-        result = await db.execute(select(Task).where(Task.status == TaskStatus.COMPLETED))
-        completed_tasks = result.scalars().all()
-        
-        if not completed_tasks:
-            print("No completed tasks found")
-            return {"status": "success", "message": "No completed tasks to clear"}
-
-        print(f"Found {len(completed_tasks)} completed tasks to clear")
-        # Delete completed tasks
-        await db.execute(delete(Task).where(Task.status == TaskStatus.COMPLETED))
-        await db.commit()
-        print(f"Successfully cleared {len(completed_tasks)} tasks")
-        return {"status": "success", "message": f"Cleared {len(completed_tasks)} completed tasks"}
-    except Exception as e:
-        print(f"Error clearing tasks: {str(e)}")
-        await db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))

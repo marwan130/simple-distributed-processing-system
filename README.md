@@ -71,9 +71,3 @@ You can start multiple workers in different terminals to process tasks in parall
 - `POST /tasks/{task_id}/complete` - Complete a task 
 - `POST /workers/{worker_id}/heartbeat` - Worker heartbeat
 - `GET /workers/count` - Get active worker count
-
-# Development
-
-- Frontend: React 18, TypeScript, Chakra UI, React Query for real time updates
-- Backend: FastAPI, SQLAlchemy, SQLite
-- Workers: Python asyncio for efficient task processing 
